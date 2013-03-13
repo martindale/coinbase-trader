@@ -2,6 +2,10 @@ var rest = require('restler')
   , repl = require('repl')
   , config = require('./config');
 
+var red = '\u001b[31m'
+  , bold = '\u001b[1m'
+  , reset = '\u001b[0m';
+
 var orders = {};
 var market = {
   rates: {}
@@ -12,7 +16,7 @@ rest.get('https://coinbase.com/api/v1/currencies/exchange_rates').on('complete',
   market.rates = data;
 });
 
-console.log('Welcome to Bitcoin Trader.\nUse BUY <amount> to buy BTC, SELL <amount> to sell.\nExample: BUY 10');
+console.log(bold + 'Welcome to BitCoin Trader.' + reset + '\nCommand-line console for buying and selling BitCoins.\n\n     Syntax: BUY <amount> [currency]\n    Example: BUY 10\n\nIf a currency is provided (USD, EUR, etc.), the order will buy as many BTC as the <amount> provides at the current exchange rates, updated once per 60 seconds.\n');
 
 repl.start({
     prompt: 'coinbase> '
@@ -32,26 +36,43 @@ repl.start({
       } else {
         switch (tokens[0]) {
           case 'buy':
-            orders[ orderID ] = {
-                type: 'buy'
-              , amount: amount
-              , denomination: denomination
-              , agent: setTimeout(function() {
-                  executeOrder( orderID );
-                }, 1) // issue order immediately.
-            };
 
             if (denomination != 'BTC') {
               var originalCurrency = amount;
               var rate = market.rates[ 'btc_to_' + denomination.toLowerCase() ];
-              amount = (amount - 0.15) / ( 1.01 * rate);
+              if (typeof(rate) != 'undefined') {
 
-              callback('Order to BUY ' + tokens[1] + ' ' + denomination + ' worth of BTC queued @ ' + rate + ' BTC/' + denomination + ' (' + amount + ' BTC)' );
+                orders[ orderID ] = {
+                    type: 'buy'
+                  , amount: amount
+                  , denomination: denomination
+                  , agent: setTimeout(function() {
+                      executeOrder( orderID );
+                    }, 1) // issue order immediately.
+                };
+
+                amount = (amount - 0.15) / ( 1.01 * rate);
+
+                callback('Order to BUY ' + tokens[1] + ' ' + denomination + ' worth of BTC queued @ ' + rate + ' BTC/' + denomination + ' (' + amount + ' BTC)' );
+              
+              } else {
+                console.log('No known exchange rate for BTC/' + denomination + '. Order failed.');
+              }
+
             } else {
+
+              orders[ orderID ] = {
+                  type: 'buy'
+                , amount: amount
+                , denomination: denomination
+                , agent: setTimeout(function() {
+                    executeOrder( orderID );
+                  }, 1) // issue order immediately.
+              };
+
               callback('Order to BUY ' + tokens[1] + ' BTC queued.');
             }
 
-            
           break;
           case 'sell':
             callback('Order to SELL ' + tokens[1] + ' ' + denomination + ' queued.');
@@ -72,11 +93,12 @@ setInterval(function() {
     market.rates = data;
   });
 
+  console.log('CURRENT BTC/USD: ' + market.rates.btc_to_usd);
   console.log('=== CURRENT ORDERS ===');
+
   Object.keys(orders).forEach(function(orderID) {
     var order = orders[ orderID ];
     console.log(orderID + ' : ' + order.type.toUpperCase() + ' ' + order.amount + ' : UNFILLED');
-    console.log('Current USD to BTC exchange rate: ' + market.rates.usd_to_btc);
   });
 }, 60000);
 

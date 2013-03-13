@@ -19,6 +19,8 @@ You should now have a console to set up BTC buy orders.  They will remain open u
 
 Use `BUY <amount>` to purchase Bitcoins, and `SELL <amount>` to sell.  Orders will be retried at the configurable interval (default: 5 seconds) until filled.  Every 60 seconds, a report will be printed of outstanding orders.
 
+Use `BUY <amount> [currency]` to buy as many Bitcoin as possible using `<amount>` of `[currency]` at the current exchange rates, updated once per 60 seconds.  Coinbase fees are included in the calculations, but fluctuating prices can result in slight over and under spends.
+
 ## Notes
 Currently, only buy orders are supported.
 
