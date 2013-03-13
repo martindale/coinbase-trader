@@ -1,0 +1,23 @@
+{
+  "name": "coinbase-trader",
+  "version": "0.0.0",
+  "description": "Node.js application to bypass buying limitations on Coinbase.",
+  "main": "bitcoin-trader.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/martindale/coinbase-trader.git"
+  },
+  "keywords": [
+    "bitcoin"
+  ],
+  "author": "Eric Martindale",
+  "license": "MIT",
+  "readmeFilename": "README.md",
+  "gitHead": "001f8c5e872659a05588d0c6cf64e6290c52ba0e",
+  "dependencies": {
+    "restler": "~2.0.1"
+  }
+}
