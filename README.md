@@ -3,7 +3,7 @@ coinbase-trader
 
 Node.js application to bypass buying limitations on Coinbase.
 
-![Example Bitcoin Trader](http://i.imgur.com/I65OwDh.png)
+![Example Bitcoin Trader](http://i.imgur.com/xIkPb66.png)
 
 ## Instructions
 You must first have node.js and [an API key from Coinbase](https://coinbase.com/docs/api/overview).  The button you'll need is a little ways down on the page:
