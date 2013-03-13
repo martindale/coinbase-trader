@@ -15,6 +15,8 @@ You must first have node.js.
 1. Clone the repo.
 2. In the repo folder, run `npm install`
 3. Edit config.js to provide your Coinbase API key.
-4. Run `node bitcoin-trader.js`
+4. Run `node trader.js`
 
 You should now have a console to set up BTC buy orders.  They will remain open until the Coinbase limit is lifted, at which point they'll be filled normally.
+
+Use `BUY <amount>` to purchase Bitcoins, and `SELL <amount>` to sell.  Orders will be retried at the configurable interval (default: 5 seconds) until filled.  Every 60 seconds, a report will be printed of outstanding orders.
