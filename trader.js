@@ -90,7 +90,9 @@ repl.start({
 setInterval(function() {
 
   rest.get('https://coinbase.com/api/v1/currencies/exchange_rates').on('complete', function(data, res) {
-    market.rates = data;
+    if (data.success) {
+      market.rates = data;
+    }
   });
 
   console.log('CURRENT BTC/USD: ' + market.rates.btc_to_usd);
@@ -115,22 +117,26 @@ function executeOrder(orderID) {
   switch(order.type) {
     case 'buy':
       console.log('Attempting to buy ' + amount + ' BTC...');
+
+      if (config.debug) { console.log(JSON.stringify(orders[orderID])); }
       rest.postJson('https://coinbase.com/api/v1/buys?api_key=' + config.coinbase.key, {
         qty: amount
       }).on('complete', function(data, res) {
         if (config.debug) { console.log(data); }
+
+        clearTimeout( orders[ orderID ].agent );
 
         if (!data.success) {
           orders[ orderID ].agent = setTimeout(function() {
             executeOrder( orderID );
           }, config.coinbase.rate);
         } else {
-          clearTimeout( orders[ orderID ].agent );
           delete orders[ orderID ];
           console.log('BUY ' + amount + ' BTC filled.');
         }
 
       });
+
     break;
   }
 
