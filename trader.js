@@ -90,7 +90,7 @@ repl.start({
 setInterval(function() {
 
   rest.get('https://coinbase.com/api/v1/currencies/exchange_rates').on('complete', function(data, res) {
-    if (data.success) {
+    if (res.statusCode == 200)
       market.rates = data;
     }
   });
