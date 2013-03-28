@@ -1,0 +1,3 @@
+[submodule "node_modules/restler"]
+	path = node_modules/restler
+	url = git://github.com/QuePort/restler.git

@@ -11,7 +11,7 @@ You must first have node.js and [an API key from Coinbase](https://coinbase.com/
 ![API key enabled](http://i.imgur.com/0YHPqhU.png)
 
 1. Clone the repo.
-2. In the repo folder, run `npm install`
+2. In the repo folder, run `git submodule init; git submodule update`
 3. Edit config.js to provide your Coinbase API key.
 4. Run `node trader.js`
 
