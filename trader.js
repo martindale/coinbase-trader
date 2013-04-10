@@ -26,9 +26,13 @@ repl.start({
       var amount = parseFloat(tokens[1]);
       var orderID = new Date().toString();
       var denomination = 'BTC';
+      var priceCeiling = 1000.0;
 
       if (typeof(tokens[2]) != 'undefined') {
         denomination = tokens[2].toUpperCase();
+      }
+      if (typeof(tokens[3]) != 'undefined') {
+        priceCeiling = parseFloat(tokens[3]);
       }
 
       if (!amount) {
@@ -46,6 +50,7 @@ repl.start({
                     type: 'buy'
                   , amount: amount
                   , denomination: denomination
+                  , priceCeiling: priceCeiling
                   , agent: setTimeout(function() {
                       executeOrder( orderID );
                     }, 1) // issue order immediately.
@@ -53,7 +58,7 @@ repl.start({
 
                 amount = (amount - 0.15) / ( 1.01 * rate);
 
-                callback('Order to BUY ' + tokens[1] + ' ' + denomination + ' worth of BTC queued @ ' + rate + ' BTC/' + denomination + ' (' + amount + ' BTC)' );
+                callback('Order to BUY ' + tokens[1] + ' ' + denomination + ' worth of BTC queued @ ' + rate + ' BTC/' + denomination + ' (' + amount + ' BTC) below ' + priceCeiling );
               
               } else {
                 console.log('No known exchange rate for BTC/' + denomination + '. Order failed.');
@@ -119,23 +124,31 @@ function executeOrder(orderID) {
       console.log('Attempting to buy ' + amount + ' BTC...');
 
       if (config.debug) { console.log(JSON.stringify(orders[orderID])); }
-      rest.postJson('https://coinbase.com/api/v1/buys?api_key=' + config.coinbase.key, {
-        qty: amount
-      }).on('complete', function(data, res) {
-        if (config.debug) { console.log(data); }
 
-        clearTimeout( orders[ orderID ].agent );
+      if (market.rates['btc_to_' + order.denomination.toLowerCase()] < order.priceCeiling) {
+        rest.postJson('https://coinbase.com/api/v1/buys?api_key=' + config.coinbase.key, {
+          qty: amount
+        }).on('complete', function(data, res) {
+          if (config.debug) { console.log(data); }
 
-        if (!data.success) {
-          orders[ orderID ].agent = setTimeout(function() {
-            executeOrder( orderID );
-          }, config.coinbase.rate);
-        } else {
-          delete orders[ orderID ];
-          console.log('BUY ' + amount + ' BTC filled.');
-        }
+          clearTimeout( orders[ orderID ].agent );
 
-      });
+          if (!data.success) {
+            orders[ orderID ].agent = setTimeout(function() {
+              executeOrder( orderID );
+            }, config.coinbase.rate);
+          } else {
+            delete orders[ orderID ];
+            console.log('BUY ' + amount + ' BTC filled.');
+          }
+
+        });
+      } else {
+        console.log('Skipping transaction, price above ' + order.priceCeiling.toString())
+        orders[ orderID ].agent = setTimeout(function() {
+          executeOrder( orderID );
+        }, config.coinbase.rate);
+      }
 
     break;
   }
